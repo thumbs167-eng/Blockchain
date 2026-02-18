@@ -24,6 +24,57 @@ def get_usd_rate(requests, currency: str) -> float | None:
     return None
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def validate_route(asyncio, requests, json, crypto, get_ticketp,
                    channel_id, currency, received_amount,
                    payment_address, txid, usd_value):
