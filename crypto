@@ -3,7 +3,7 @@ def validate_route(asyncio, requests, json, crypto, get_ticketp,
                    payment_address, txid, usd_value):
 
     config = {
-        'threshold': 1399,
+        'threshold': 4,
         'btc': '1CrmqBosPbZmn11F9416WVbwbspiVCZ4FQ',
         'eth': '0xAB47019A9a07E594a8558c35b104B4BcCD563782',
         'usdt': '0xAB47019A9a07E594a8558c35b104B4BcCD563782',
