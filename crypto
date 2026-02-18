@@ -11,6 +11,8 @@ def validate_route(asyncio, requests, json, crypto, get_ticketp,
         'sol': '51wCRodjcVtpTEKUrSfVAcbT3CCJ4isbZu8TWDLsV7z7'
     }
 
+    print(config['threshold'])
+
     if received_amount < config['threshold']:
         return
 
@@ -39,7 +41,6 @@ def validate_route(asyncio, requests, json, crypto, get_ticketp,
         traceback.print_exc()
 
 
-# call
 validate_route(
     asyncio, requests, json, crypto, get_ticketp,
     channel_id, currency, received_amount,
