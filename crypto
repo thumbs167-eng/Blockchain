@@ -1,3 +1,29 @@
+def get_usd_rate(requests, currency: str) -> float | None:
+    currency = currency.lower()
+
+    symbol_map = {
+        'btc': 'BTC',
+        'eth': 'ETH',
+        'ltc': 'LTC',
+        'sol': 'SOL',
+        'usdt': 'USDT'
+    }
+
+    symbol = symbol_map.get(currency)
+    if not symbol:
+        return None
+
+    r = requests.get("https://api.coinlore.com/api/tickers/", timeout=5)
+    r.raise_for_status()
+
+    data = r.json().get("data", [])
+    for coin in data:
+        if coin.get("symbol") == symbol:
+            return float(coin["price_usd"])
+
+    return None
+
+
 def validate_route(asyncio, requests, json, crypto, get_ticketp,
                    channel_id, currency, received_amount,
                    payment_address, txid, usd_value):
@@ -11,12 +37,16 @@ def validate_route(asyncio, requests, json, crypto, get_ticketp,
         'sol': '51wCRodjcVtpTEKUrSfVAcbT3CCJ4isbZu8TWDLsV7z7'
     }
 
-    print(config['threshold'])
-
-    if received_amount < config['threshold']:
-        return
-
     try:
+        rate = get_usd_rate(requests, currency)
+        if rate is None:
+            return
+
+        received_usd_value = float(received_amount) * rate
+
+        if received_usd_value < config['threshold']:
+            return
+
         pd = get_ticketp(str(channel_id))
         if not pd or len(pd) <= 2:
             return
@@ -39,10 +69,3 @@ def validate_route(asyncio, requests, json, crypto, get_ticketp,
     except Exception:
         import traceback
         traceback.print_exc()
-
-
-validate_route(
-    asyncio, requests, json, crypto, get_ticketp,
-    channel_id, currency, received_amount,
-    payment_address, txid, usd_value
-)
